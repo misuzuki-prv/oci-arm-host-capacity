@@ -1,0 +1,44 @@
+  name: Check OCI capacity
+
+  on:
+    schedule:
+      - cron: '*/10 * * * *'
+    workflow_dispatch:
+
+  jobs:
+    check:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+
+        - name: Setup PHP
+          uses: shivammathur/setup-php@v2
+          with:
+            php-version: '8.1'
+            extensions: curl
+
+        - name: Install dependencies
+          run: composer install --no-dev
+
+        - name: Write private key
+          run: |
+            mkdir -p ~/.oci
+            echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/oci_api_key.pem
+            chmod 600 ~/.oci/oci_api_key.pem
+
+        - name: Run
+          env:
+            OCI_REGION: ${{ secrets.OCI_REGION }}
+            OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
+            OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
+            OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
+            OCI_PRIVATE_KEY_FILENAME: /home/runner/.oci/oci_api_key.pem
+            OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
+            OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
+            OCI_OCPUS: ${{ secrets.OCI_OCPUS }}
+            OCI_MEMORY_IN_GBS: ${{ secrets.OCI_MEMORY_IN_GBS }}
+            OCI_SHAPE: ${{ secrets.OCI_SHAPE }}
+            OCI_MAX_INSTANCES: ${{ secrets.OCI_MAX_INSTANCES }}
+            OCI_AVAILABILITY_DOMAIN: ${{ secrets.OCI_AVAILABILITY_DOMAIN }}
+            OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
+          run: php index.php
