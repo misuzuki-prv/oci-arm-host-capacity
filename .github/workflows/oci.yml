@@ -12,10 +12,9 @@
         - uses: actions/checkout@v4
 
         - name: Setup PHP
-          uses: shivammathur/setup-php@v2
-          with:
-            php-version: '8.1'
-            extensions: curl
+          run: |
+            sudo apt-get update -q
+            sudo apt-get install -y -q php-cli php-curl php-xml php-mbstring
 
         - name: Install dependencies
           run: composer install --no-dev
